@@ -2,7 +2,6 @@ package ke.co.openmaps.createchs.techguardian;
 
 import android.net.Uri;
 import android.util.Log;
-import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,14 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NewsUtils {
-    // fields to retrieve from api response
-    private String title = "webTitle";
-    private String section = "sectionName";
-    private String date = "webPublicationDate";
-    private String url = "webUrl";
-    private String tags = "tags";
-    private String results = "results";
 
+    private static final String TAG = "NewsUtils";
     public NewsUtils() {
     }
 
@@ -59,44 +52,60 @@ public class NewsUtils {
     private static String getUrl() {
         // Guardian content endpoint
         String endpointUrl = "https://content.guardianapis.com/search";
-//        URI baseUri = URI.create(endpointUrl);
+        String apiKey = "8899a4d1-de3b-41c1-b171-882b35592b06";
+        String url = "";
         Uri baseUri = Uri.parse(endpointUrl);
         Uri.Builder builder = baseUri.buildUpon();
-        builder.appendQueryParameter("api-key", "test")
+        builder.appendQueryParameter("api-key", apiKey)
                 .appendQueryParameter("show-tags", "contributor")
                 .appendQueryParameter("format", "json")
                 .appendQueryParameter("section", "technology");
-        return builder.build().toString();
+        url = builder.build().toString();
+        Log.i(TAG, "Request url:" + url);
+        return url;
     }
 
     public static List<NewsItem> fetchNewsItems() {
         String requestUrl = getUrl();
+        String jsonResponse = null;
         HttpURLConnection connection;
         InputStream inputStream;
         try {
             URL url = new URL(requestUrl);
             connection = (HttpURLConnection) url.openConnection();
             connection.connect();
-            inputStream = connection.getInputStream();
-            decodeStream(inputStream);
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                inputStream = connection.getInputStream();
+                jsonResponse = decodeStream(inputStream);
+            }
+
         } catch (MalformedURLException e) {
             Log.e("NewsUtils", "There was an error generating the url",e);
         } catch (IOException e) {
             e.printStackTrace();
         }
         // TODO:
-        return new ArrayList<NewsItem>();
+        return parseJson(jsonResponse);
     }
 
-    private List<NewsItem> parseJson(String jsonString) {
+    private static List<NewsItem> parseJson(String jsonString) {
         List<NewsItem> newsItems = new ArrayList<>();
         if (jsonString == null) {
             return null;
         }
+
+        // fields to retrieve from api response
+        String title = "webTitle";
+        String section = "sectionName";
+        String date = "webPublicationDate";
+        String url = "webUrl";
+        String tags = "tags";
+        String results = "results";
+
         JSONObject rootResponse;
         JSONArray news;
         try {
-            rootResponse = new JSONObject(jsonString);
+            rootResponse = new JSONObject(jsonString).getJSONObject("response");
             news = rootResponse.getJSONArray(results);
             for (int i = 0; i < news.length(); i++) {
                 JSONObject newsItem = news.getJSONObject(i);
