@@ -3,4 +3,5 @@
     <string name="no_results">Could not retrieve News items</string>
     <string name="published">"Published "</string>
     <string name="by">" by "</string>
+    <string name="not_connected">Device is offline</string>
 </resources>

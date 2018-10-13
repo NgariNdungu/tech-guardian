@@ -1,10 +1,15 @@
 package ke.co.openmaps.createchs.techguardian;
 
 import android.app.LoaderManager;
+import android.content.Intent;
 import android.content.Loader;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -37,8 +42,25 @@ public class NewsActivity extends AppCompatActivity implements LoaderManager.Loa
         // set adapter on listview
         list.setAdapter(adapter);
         list.setEmptyView(noData);
+        // open news item in browser when clicked on
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String url = adapter.getItem(position).getUrl();
+                Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                if (webIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(webIntent);
+                }
+            }
+        });
 
-        getLoaderManager().initLoader(0,null, this);
+        // load news stories if device is connected to the internet
+        if (isOnline()) {
+            getLoaderManager().initLoader(0, null, this);
+        } else {
+            progressBar.setVisibility(View.GONE);
+            noData.setText(R.string.not_connected);
+        }
     }
 
     @Override
@@ -60,5 +82,15 @@ public class NewsActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onLoaderReset(Loader loader) {
         adapter.clear();
+    }
+
+    /**
+     * Method checks if device is connected to the internet
+     * from https://developer.android.com/training/basics/network-ops/managing#check-connection
+     */
+    private boolean isOnline() {
+        ConnectivityManager manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+        return (networkInfo != null && networkInfo.isConnected());
     }
 }
