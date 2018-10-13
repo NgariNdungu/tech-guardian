@@ -8,6 +8,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -65,7 +66,7 @@ public class NewsActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public Loader<List<NewsItem>> onCreateLoader(int id, Bundle args) {
-        return new NewsLoader(this);
+        return new NewsLoader(this, getUrl());
     }
 
     @Override
@@ -93,4 +94,24 @@ public class NewsActivity extends AppCompatActivity implements LoaderManager.Loa
         NetworkInfo networkInfo = manager.getActiveNetworkInfo();
         return (networkInfo != null && networkInfo.isConnected());
     }
+
+    /**
+     * Method returns properly constructed request url
+     */
+    private  String getUrl() {
+        // Guardian content endpoint
+        String endpointUrl = "https://content.guardianapis.com/search";
+        String apiKey = "8899a4d1-de3b-41c1-b171-882b35592b06";
+        String url;
+        Uri baseUri = Uri.parse(endpointUrl);
+        Uri.Builder builder = baseUri.buildUpon();
+        builder.appendQueryParameter("api-key", apiKey)
+                .appendQueryParameter("show-tags", "contributor")
+                .appendQueryParameter("format", "json")
+                .appendQueryParameter("section", "technology");
+        url = builder.build().toString();
+        Log.i(LOG_TAG, "Request url:" + url);
+        return url;
+    }
+
 }

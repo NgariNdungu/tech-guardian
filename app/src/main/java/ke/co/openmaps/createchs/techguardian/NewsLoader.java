@@ -6,8 +6,10 @@ import android.content.Context;
 import java.util.List;
 
 public class NewsLoader extends AsyncTaskLoader<List<NewsItem>> {
-    public NewsLoader(Context context) {
+    private String url;
+    public NewsLoader(Context context, String url) {
         super(context);
+        this.url = url;
     }
 
     @Override
@@ -18,6 +20,6 @@ public class NewsLoader extends AsyncTaskLoader<List<NewsItem>> {
 
     @Override
     public List<NewsItem> loadInBackground() {
-        return NewsUtils.fetchNewsItems();
+        return NewsUtils.fetchNewsItems(url);
     }
 }
