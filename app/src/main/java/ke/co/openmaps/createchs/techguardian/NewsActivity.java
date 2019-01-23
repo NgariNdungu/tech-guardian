@@ -8,6 +8,8 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -23,14 +25,18 @@ import butterknife.ButterKnife;
 
 public class NewsActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<NewsItem>> {
 
-    @BindView(R.id.list)
-    ListView list;
+   /* @BindView(R.id.list)
+    ListView list;*/
+    @BindView(R.id.list_recycler)
+    RecyclerView list_recycler;
     @BindView(R.id.progress_bar)
     ProgressBar progressBar;
     @BindView(R.id.no_data)
     TextView noData;
 
-    private NewsAdapter adapter;
+//    private NewsAdapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
+    private RecyclerView.Adapter recyclerAdapter;
     public final String LOG_TAG = this.getClass().getSimpleName();
 
     @Override
@@ -39,11 +45,18 @@ public class NewsActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_news);
 
         ButterKnife.bind(this);
-        adapter = new NewsAdapter(this, new ArrayList<NewsItem>());
+//        adapter = new NewsAdapter(this, new ArrayList<NewsItem>());
+
+        list_recycler.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(this);
+        list_recycler.setLayoutManager(layoutManager);
+
         // set adapter on listview
-        list.setAdapter(adapter);
-        list.setEmptyView(noData);
+//        list.setAdapter(adapter);
+//        list.setEmptyView(noData);
+
         // open news item in browser when clicked on
+/*
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -54,6 +67,7 @@ public class NewsActivity extends AppCompatActivity implements LoaderManager.Loa
                 }
             }
         });
+*/
 
         // load news stories if device is connected to the internet
         if (isOnline()) {
@@ -71,18 +85,18 @@ public class NewsActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(Loader<List<NewsItem>> loader, List<NewsItem> data) {
-        adapter.clear();
         progressBar.setVisibility(View.GONE);
         if (data == null) {
             noData.setText(R.string.no_results);
             return;
         }
-        adapter.addAll(data);
+        recyclerAdapter = new NewsRecyclerAdapter((ArrayList<NewsItem>) data);
+        list_recycler.setAdapter(recyclerAdapter);
     }
 
     @Override
     public void onLoaderReset(Loader loader) {
-        adapter.clear();
+        list_recycler.removeAllViews();
     }
 
     /**
