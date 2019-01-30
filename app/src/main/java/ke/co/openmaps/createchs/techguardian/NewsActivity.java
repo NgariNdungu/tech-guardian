@@ -90,7 +90,7 @@ public class NewsActivity extends AppCompatActivity implements LoaderManager.Loa
             noData.setText(R.string.no_results);
             return;
         }
-        recyclerAdapter = new NewsRecyclerAdapter((ArrayList<NewsItem>) data);
+        recyclerAdapter = new NewsRecyclerAdapter((ArrayList<NewsItem>) data, this.getBaseContext());
         list_recycler.setAdapter(recyclerAdapter);
     }
 
